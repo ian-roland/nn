@@ -7,11 +7,11 @@
 
 // Data structure to hold the sample data
 typedef struct {
-	int num_rows;		// Number of rows of data
-	int num_inputs;		// Number of inputs to neural network
-	int num_outputs;	// Number of outputs from neural network
-	float **input;		// 2D array of inputs
-	float **target;		// 2D array of targets
+    int num_rows;        // Number of rows of data
+    int num_inputs;      // Number of inputs to neural network
+    int num_outputs;     // Number of outputs from neural network
+    int8_t **input;      // 2D array of inputs
+    int8_t **target;     // 2D array of targets
 } data_t;
 
 data_t *data_init(int num_rows, int num_inputs, int num_outputs);
