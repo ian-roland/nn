@@ -93,12 +93,11 @@ static int8_t activation_function_sigmoid(int8_t a, bool derivative)
 // Sigmoid activation function using a lookup table
 static int8_t activation_function_sigmoid_fast(int8_t a, bool derivative)
 {
-    // Sigmoid outputs scaled by 128
-    const int32_t s[] = {0, 6, 16, 43, 116, 317, 856, 2303, 6067, 15255, 34411, 64000, 93459, 112742, 121929, 125698, 127573, 128483, 128899, 128956, 128984, 128998, 129};
-    // Derivative of the sigmoid scaled by 128
-    const int32_t ds[] = {0, 6, 16, 43, 116, 316, 851, 2261, 5783, 13439, 25166, 32000, 25166, 13439, 5783, 2261, 851, 316, 116, 43, 16, 6, 0};
+    const int32_t s[] = {0, 45, 123, 335, 911, 2473, 6693, 17986, 47426, 119203, 268941, 500000, 731059, 880797, 952574, 982014, 993307, 997527, 999089, 999665, 999877, 999955, 1000000};
+    // Derivative of the sigmoid in fixed-point (scaled by 1,000,000)
+    const int32_t ds[] = {0, 45, 123, 335, 910, 2467, 6648, 17663, 45177, 104994, 196612, 250000, 196612, 104994, 45177, 17663, 6648, 2466, 910, 335, 123, 45, 0};
     int index;
-    int8_t fraction = 0;
+    int32_t fraction = 0;
 
     index = (a / 11) + 11;
     if (index < 0)
