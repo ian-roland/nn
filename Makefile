@@ -1,6 +1,23 @@
-all:	train test predict summary libnn.so
+all:	copy_model train test predict summary libnn.so
 
 CFLAGS=-g # -Ofast
+
+FLOATING_POINT_PROJECT_PATH= ../nnQuantized
+
+copy_model:
+	@echo "Searching for quantized model in: $(FLOATING_POINT_PROJECT_PATH)"
+	@echo "Current directory: $(PWD)"
+	@if [ -f "$(FLOATING_POINT_PROJECT_PATH)/quantized_model.txt" ]; then \
+		cp "$(FLOATING_POINT_PROJECT_PATH)/quantized_model.txt" ./model.txt; \
+		echo "Copied quantized model successfully"; \
+	else \
+		echo "Error: Quantized model not found in $(FLOATING_POINT_PROJECT_PATH)"; \
+		echo "Possible solutions:"; \
+		echo "1. Ensure floating-point project is trained and quantized"; \
+		echo "2. Check the FLOATING_POINT_PROJECT_PATH variable"; \
+		echo "3. Manually copy the model to this directory as 'model.txt'"; \
+		exit 1; \
+	fi
 
 libnn.so: nn.o data_prep.o
 	$(RM) $@
