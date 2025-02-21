@@ -100,6 +100,7 @@ int nn_save_quantized(nn_quantized_t* quantized_network, const char* path) {
     nn_t* network = quantized_network->original_network;
 
     // Save network architecture
+    fprintf(file, "1\n");
     fprintf(file, "%d\n", network->depth);
     for (int i = 0; i < network->depth; i++) {
         fprintf(file, "%d %d %f\n", network->width[i], network->activation[i], network->bias[i]);
