@@ -376,11 +376,20 @@ nn_t *nn_load(char *path)
 	float bias = 0;
 	int layer, i, j;
 	int depth;
+	int flag;
 
 	file = fopen(path, "r");
 	if (NULL == file)
 		return NULL;
 	nn = nn_init();
+
+	// Read and ignore the first line (flag)
+    if (fscanf(file, "%d\n", &flag) != 1) {
+        fclose(file);
+        nn_free(nn);
+        return NULL;
+    }
+
 	fscanf(file, "%d\n", &depth);
 	for (i = 0; i < depth; i++) {
 		fscanf(file, "%d %d %f\n", &width, &activation, &bias);
@@ -412,6 +421,7 @@ int nn_save(nn_t *nn, char *path)
 	// width, activation, bias
 	// weight
 
+	fprintf(file, "0\n");
 	fprintf(file, "%d\n", nn->depth);
 	for (i = 0; i < nn->depth; i++)
 		fprintf(file, "%d %d %f\n", nn->width[i], nn->activation[i], nn->bias[i]);
@@ -460,6 +470,14 @@ nn_quantized_t* nn_load_quantized(const char* path) {
 
 	// Load original network structure
 	qmodel->original_network = nn_init();
+
+	int flag; // Skip the first line
+    if (fscanf(file, "%d\n", &flag) != 1) {
+        fclose(file);
+        free(qmodel);
+        return NULL;
+    }
+
 	int depth;
 	
 	// Read network depth
