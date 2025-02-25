@@ -28,6 +28,13 @@ typedef enum activation_function_type {
 	ACTIVATION_FUNCTION_TYPE_TANH_FAST
 } activation_function_type_t;
 
+typedef struct {
+	int8_t*** quantized_weights;
+	float** weight_scales;
+	int8_t** quantized_biases;
+	float* bias_scales;
+} nn_quantized_t;
+
 typedef struct nn {
 	uint32_t depth;			// Number of layers, including the input and the output layers
 	uint32_t *width;			// Number of neurons in each layer (can vary from layer to layer)
@@ -38,15 +45,8 @@ typedef struct nn {
 	float **preact;		// Neuron values before activation function is applied for each neuron in each layer
 	float ***weight;	// Weight of each neuron in each layer
 	float ***weight_adj;// Adjustment of each weight for each neuron in each layer
+	nn_quantized_t* quantized_network;
 } nn_t;
-
-typedef struct {
-	nn_t* original_network;
-	int8_t*** quantized_weights;
-	float** weight_scales;
-	int8_t** quantized_biases;
-	float* bias_scales;
-} nn_quantized_t;
 
 nn_t *nn_init(void);
 void nn_free(nn_t *nn);
