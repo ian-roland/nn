@@ -30,10 +30,12 @@ static int8_t quantize_value(float value, float scale, float zero_point) {
 }
 
 nn_quantized_t* nn_quantize(nn_t* network) {
-    nn_quantized_t* quantized = malloc(sizeof(nn_quantized_t));
-    if (!quantized) return NULL;
+    if (!network) return NULL;
 
-    quantized->original_network = network;
+    nn_quantized_t* quantized = malloc(sizeof(nn_quantized_t));
+    
+
+    network->quantized_network = quantized;
     
     // Allocate memory for quantized weights and scales
     quantized->quantized_weights = malloc(sizeof(int8_t**) * network->depth);
@@ -91,13 +93,13 @@ nn_quantized_t* nn_quantize(nn_t* network) {
     return quantized;
 }
 
-int nn_save_quantized(nn_quantized_t* quantized_network, const char* path) {
-    if (!quantized_network || !path) return -1;
+int nn_save_quantized(nn_t* network, const char* path) {
+    if (!network || !network->quantized_network || !path) return -1;
+
+    nn_quantized_t* quantized_network = network->quantized_network;
 
     FILE* file = fopen(path, "w");
     if (!file) return -1;
-
-    nn_t* network = quantized_network->original_network;
 
     // Save network architecture
     fprintf(file, "1\n");
@@ -154,9 +156,8 @@ int main(int argc, char *argv[]) {
     }
 
     // Save the quantized network
-    if (nn_save_quantized(quantized, output_model) != 0) {
+    if (nn_save_quantized(network , output_model) != 0) {
         fprintf(stderr, "Failed to save quantized model: %s\n", output_model);
-        nn_free_quantized(quantized);
         nn_free(network);
         return 1;
     }
@@ -166,7 +167,6 @@ int main(int argc, char *argv[]) {
     printf("  Output: %s\n", output_model);
 
     // Clean up
-    nn_free_quantized(quantized);
     nn_free(network);
     
     return 0;
