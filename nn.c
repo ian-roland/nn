@@ -409,48 +409,71 @@ float *nn_predict_quantized(nn_t *network, float *input) {
 }
 
 // Loads a neural net model file
-nn_t *nn_load(char *path)
-{
-	FILE *file;
-	nn_t *nn;
-	int width = 0;
-	int activation = ACTIVATION_FUNCTION_TYPE_NONE;
-	float bias = 0;
-	int layer, i, j;
-	int depth;
-	int flag;
+nn_t *nn_load(char *path) {
+    FILE *file;
+    nn_t *nn;
+    int width = 0;
+    int activation = ACTIVATION_FUNCTION_TYPE_NONE;
+    float bias = 0;
+    int layer, i, j;
+    int depth;
+    int flag;
 
-	file = fopen(path, "r");
-	if (NULL == file)
-		return NULL;
-	nn = nn_init();
+    file = fopen(path, "r");
+    if (file == NULL) {
+        return NULL;
+    }
 
-	// Read and ignore the first line (flag)
+    nn = nn_init();
+    if (nn == NULL) {
+        fclose(file);
+        return NULL;
+    }
+
+    // Read and check the flag
     if (fscanf(file, "%d\n", &flag) != 1) {
         fclose(file);
         nn_free(nn);
         return NULL;
     }
 
-	if (fscanf(file, "%d\n", &depth) != 1) {
-		fclose(file);
-		free(nn);
-		return NULL;
-	}
-	for (i = 0; i < depth; i++) {
-		fscanf(file, "%d %d %f\n", &width, &activation, &bias);
-		if (nn_add_layer(nn, width, activation, bias) != 0) {
-			fclose(file);
-			return NULL;
-		}
-	}
-	// Read in the weights
-	for (layer = 1; layer < nn->depth; layer++)
-		for (i = 0; i < nn->width[layer]; i++)
-			for (j = 0; j < nn->width[layer - 1]; j++)
-				fscanf(file, "%f\n", &nn->weight[layer][i][j]);
-	fclose(file);
-	return nn;
+    // Read and check depth
+    if (fscanf(file, "%d\n", &depth) != 1) {
+        fclose(file);
+        nn_free(nn);
+        return NULL;
+    }
+
+    // Read layer configurations
+    for (int i = 0; i < depth; i++) {
+        if (fscanf(file, "%d %d %f\n", &width, &activation, &bias) != 3) {
+            fclose(file);
+            nn_free(nn);
+            return NULL;
+        }
+
+        if (nn_add_layer(nn, width, activation, bias) != 0) {
+            fclose(file);
+            nn_free(nn);
+            return NULL;
+        }
+    }
+
+    // Read weights with error checking
+    for (layer = 1; layer < nn->depth; layer++) {
+        for (i = 0; i < nn->width[layer]; i++) {
+            for (j = 0; j < nn->width[layer - 1]; j++) {
+                if (fscanf(file, "%f\n", &nn->weight[layer][i][j]) != 1) {
+                    fclose(file);
+                    nn_free(nn);
+                    return NULL;
+                }
+            }
+        }
+    }
+
+    fclose(file);
+    return nn;
 }
 
 // Saves a neural net model file
