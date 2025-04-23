@@ -171,6 +171,6 @@ int main(int argc, char *argv[]) {
     // Clean up
     // Causing Segmentation Error Fault, Working on it!!
     //nn_free(network);
-    
+     
     return 0;
 }
