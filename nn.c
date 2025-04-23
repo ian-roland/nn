@@ -471,7 +471,6 @@ nn_t *nn_load(char *path) {
             }
         }
     }
-
     fclose(file);
     return nn;
 }
