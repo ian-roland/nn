@@ -33,7 +33,11 @@ nn_quantized_t* nn_quantize(nn_t* network) {
     if (!network) return NULL;
 
     nn_quantized_t* quantized = malloc(sizeof(nn_quantized_t));
-    
+    if (!quantized) return NULL;
+
+    // Initialize all fields to NULL
+    quantized->quantized_weights = NULL;
+    quantized->weight_scales = NULL;
 
     network->quantized_network = quantized;
     
@@ -151,14 +155,12 @@ int main(int argc, char *argv[]) {
     nn_quantized_t* quantized = nn_quantize(network);
     if (!quantized) {
         fprintf(stderr, "Failed to quantize network\n");
-        nn_free(network);
         return 1;
     }
 
     // Save the quantized network
     if (nn_save_quantized(network , output_model) != 0) {
         fprintf(stderr, "Failed to save quantized model: %s\n", output_model);
-        nn_free(network);
         return 1;
     }
 
@@ -167,7 +169,8 @@ int main(int argc, char *argv[]) {
     printf("  Output: %s\n", output_model);
 
     // Clean up
-    nn_free(network);
+    // Causing Segmentation Error Fault, Working on it!!
+    //nn_free(network);
     
     return 0;
 }
